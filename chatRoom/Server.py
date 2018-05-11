@@ -25,7 +25,11 @@ class Server:
                 mythread = threading.Thread(target=self.subThreadIn, args=(connection, connection.fileno()))
                 mythread.setDaemon(True)
                 mythread.start()
-                self.tellOthers(connection.fileno(), "SYSTEM: in the chat room")
+                
+            '''
+            elif buf[0] == '2':
+                nickname = buf.split(',')[1]
+                self.tellOthers(connection.fileno(), "SYSTEM: %s in the chat room" % nickname)'''
 
             else:
                 connection.send(b'please go out!')
