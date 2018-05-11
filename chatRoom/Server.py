@@ -41,7 +41,7 @@ class Server:
                 if recvedMsg:
                     now = datetime.now()
                     my_time = "   [%s:%s:%s]" % (now.hour, now.minute, now.second)
-                    recvedMsg = recvedMsg + my_time
+                   recvedMsg = recvedMsg + my_time +"     "+ str(len(self.mylist))
                     self.tellOthers(connNumber, recvedMsg)
                 else:
                     pass
