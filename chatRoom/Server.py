@@ -1,9 +1,7 @@
 # -*- encoding: utf-8 -*-
 import socket
 import threading
-import datetime
-import time
-from time import gmtime, strftime
+from datetime import datetime
 
 
 class Server:
@@ -23,9 +21,11 @@ class Server:
             buf = connection.recv(1024).decode()
             if buf == '1':
                 # start a thread for new connection
+                connection.send(b'Welcome to chat room!')
                 mythread = threading.Thread(target=self.subThreadIn, args=(connection, connection.fileno()))
                 mythread.setDaemon(True)
                 mythread.start()
+                self.tellOthers(connection.fileno(), "SYSTEM: in the chat room")
 
             else:
                 connection.send(b'please go out!')
@@ -33,29 +33,22 @@ class Server:
         except:
             pass
 
-    # send whatToSay to every except people in exceptNum
-    def tellOthers(self, exceptNum, whatToSay):
-        for c in self.mylist:
-            if c.fileno() != exceptNum:
-                try:
-					now = datetime.datetime.now()
-                    whatToSay=whatToSay+"       "+str(now.strftime("[%H:%M:%S]"))
-                    c.send(whatToSay.encode())
-                except:
-                    pass
-
     def subThreadIn(self, myconnection, connNumber):
         self.mylist.append(myconnection)
         while True:
             try:
                 recvedMsg = myconnection.recv(1024).decode()
                 if recvedMsg:
+                    now = datetime.now()
+                    my_time = "   [%s:%s:%s]" % (now.hour, now.minute, now.second)
+                    recvedMsg = recvedMsg + my_time
                     self.tellOthers(connNumber, recvedMsg)
                 else:
                     pass
 
             except (OSError, ConnectionResetError):
                 try:
+                    self.tellOthers(myconnection.fileno(), "SYSTEM: someone leave the chat room")
                     self.mylist.remove(myconnection)
                 except:
                     pass
@@ -63,9 +56,18 @@ class Server:
                 myconnection.close()
                 return
 
+    # send whatToSay to every except people in exceptNum
+    def tellOthers(self, exceptNum, whatToSay):
+        for c in self.mylist:
+            if c.fileno() != exceptNum:
+                try:
+                    c.send(whatToSay.encode())
+                except:
+                    pass
+
 
 def main():
-    s = Server('localhost', 5550)
+    s = Server('140.138.145.43', 5550)
     while True:
         s.checkConnection()
 
