@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
 import socket
 import threading
+import datetime
+import time
 from time import gmtime, strftime
 
 
@@ -36,6 +38,8 @@ class Server:
         for c in self.mylist:
             if c.fileno() != exceptNum:
                 try:
+					now = datetime.datetime.now()
+                    whatToSay=whatToSay+"       "+str(now.strftime("[%H:%M:%S]"))
                     c.send(whatToSay.encode())
                 except:
                     pass
