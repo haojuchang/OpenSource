@@ -41,7 +41,7 @@ class Server:
                 if recvedMsg:
                     now = datetime.now()
                     my_time = "   [%s:%s:%s]" % (now.hour, now.minute, now.second)
-                   recvedMsg = recvedMsg + my_time +"     "+ str(len(self.mylist))
+                    recvedMsg = recvedMsg + my_time +"     "+ str(len(self.mylist))
                     self.tellOthers(connNumber, recvedMsg)
                 else:
                     pass
@@ -67,7 +67,7 @@ class Server:
 
 
 def main():
-    s = Server('140.138.145.43', 5550)
+    s = Server('localhost', 5550)
     while True:
         s.checkConnection()
 
