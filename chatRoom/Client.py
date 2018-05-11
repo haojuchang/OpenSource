@@ -7,12 +7,13 @@ class Client:
         self.sock = sock
         self.sock.connect((host, port))
         self.sock.send(b'1')
-
+        self.nickname = None
     def sendThreadFunc(self):
         while True:
             try:
-                myword = input()
-                self.sock.send(myword.encode())
+                if self.nickname != None:
+                    myword = input("Input message: ")
+                    self.sock.send((self.nickname + ": " + myword).encode())
             except ConnectionAbortedError:
                 print('Server closed this connection!')
             except ConnectionResetError:
@@ -37,6 +38,8 @@ def main():
     for t in threads:
         t.setDaemon(True)
         t.start()
+    nickname = input("Input your nickname: ")
+    c.setNickname(nickname)
     t.join()
 
 if __name__ == "__main__":
