@@ -74,7 +74,6 @@ class Server:
         for c in self.mylist:
             if c.fileno() != exceptNum:
                 try:
-                    whatToSay
                     c.send(whatToSay.encode())
                 except:
                     pass
