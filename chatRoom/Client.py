@@ -1,6 +1,7 @@
 import socket
 import threading
 
+
 class Client:
     def __init__(self, host, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -12,7 +13,7 @@ class Client:
     def sendThreadFunc(self):
         while True:
             try:
-                if self.nickname != None:
+                if self.nickname is not None:
                     myword = input()
                     self.sock.send((self.nickname + ": " + myword).encode())
             except ConnectionAbortedError:
@@ -23,29 +24,36 @@ class Client:
     def recvThreadFunc(self):
         while True:
             try:
-                otherword = self.sock.recv(1024) # socket.recv(recv_size)
-                print(otherword.decode())
+                if self.nickname is not None:
+                    otherword = self.sock.recv(1024)  # socket.recv(recv_size)
+                    print(otherword.decode())
             except ConnectionAbortedError:
                 print('Server closed this connection!')
+                break
 
             except ConnectionResetError:
                 print('Server is closed!')
-    
-    def setNickname(self, nickname):
-        self.nickname = nickname
-        # self.sock.send(b'2,%s' %nickname)
+                break
+
+    def setNickname(self):
+        self.nickname = input("Input your nickname: ")
+        message = '#NAME#,{nickname}'.format(nickname=self.nickname)
+
+        self.sock.send(message.encode())
+
 
 def main():
-    c = Client('140.138.145.43', 5550)
+    c = Client('localhost', 5550)
     th1 = threading.Thread(target=c.sendThreadFunc)
     th2 = threading.Thread(target=c.recvThreadFunc)
     threads = [th1, th2]
     for t in threads:
         t.setDaemon(True)
         t.start()
-    nickname = input("Input your nickname: ")
-    c.setNickname(nickname)
+
+    c.setNickname()
     t.join()
+
 
 if __name__ == "__main__":
     main()

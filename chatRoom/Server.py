@@ -13,6 +13,8 @@ class Server:
         print('Server', socket.gethostbyname(host), 'listening ...')
         self.mylist = list()
 
+        self.nicknames = dict()
+
     def checkConnection(self):
         connection, addr = self.sock.accept()
         print('Accept a new connection', connection.getsockname(), connection.fileno())
@@ -25,11 +27,6 @@ class Server:
                 mythread = threading.Thread(target=self.subThreadIn, args=(connection, connection.fileno()))
                 mythread.setDaemon(True)
                 mythread.start()
-                
-            '''
-            elif buf[0] == '2':
-                nickname = buf.split(',')[1]
-                self.tellOthers(connection.fileno(), "SYSTEM: %s in the chat room" % nickname)'''
 
             else:
                 connection.send(b'please go out!')
@@ -42,17 +39,26 @@ class Server:
         while True:
             try:
                 recvedMsg = myconnection.recv(1024).decode()
-                if recvedMsg:
+
+                if '#NAME#' in recvedMsg:
+                    nickname = recvedMsg.split(',')[1]
+                    announcement = "SYSTEM: {nickname} in the chat room".format(nickname=nickname)
+                    self.tellOthers(myconnection.fileno(), announcement)
+
+                    self.nicknames[myconnection] = nickname
+
+                elif recvedMsg:
                     now = datetime.now()
-                    my_time = "   [%s:%s:%s]" % (now.hour, now.minute, now.second)
-                    recvedMsg = recvedMsg + my_time +"     "+ str(len(self.mylist))
+                    my_time = "[{hour}:{minute}:{second}]".format(hour=now.hour, minute=now.minute, second=now.second)
+                    recvedMsg = recvedMsg + "   " + my_time + "   " + str(len(self.mylist))
                     self.tellOthers(connNumber, recvedMsg)
-                else:
-                    pass
 
             except (OSError, ConnectionResetError):
                 try:
-                    self.tellOthers(myconnection.fileno(), "SYSTEM: someone leave the chat room")
+                    nickname = self.nicknames[myconnection]
+                    announcement = "SYSTEM: {nickname} leave the chat room".format(nickname=nickname)
+                    self.tellOthers(myconnection.fileno(), announcement)
+
                     self.mylist.remove(myconnection)
                 except:
                     pass
@@ -78,4 +84,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
