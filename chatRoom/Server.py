@@ -3,6 +3,8 @@ import socket
 import threading
 from datetime import datetime
 
+from variables import *
+
 
 class Server:
     def __init__(self, host, port):
@@ -10,10 +12,11 @@ class Server:
         self.sock = sock
         self.sock.bind((host, port))
         self.sock.listen(5)
-        print('Server', socket.gethostbyname(host), 'listening ...')
-        self.mylist = list()
 
+        self.mylist = list()
         self.nicknames = dict()
+
+        print('Server', socket.gethostbyname(host), 'listening ...')
 
     def checkConnection(self):
         connection, addr = self.sock.accept()
@@ -71,13 +74,14 @@ class Server:
         for c in self.mylist:
             if c.fileno() != exceptNum:
                 try:
+                    whatToSay
                     c.send(whatToSay.encode())
                 except:
                     pass
 
 
 def main():
-    s = Server('localhost', 5550)
+    s = Server(HOST, 5550)
     while True:
         s.checkConnection()
 
