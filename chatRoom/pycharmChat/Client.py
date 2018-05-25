@@ -3,6 +3,8 @@ import threading
 
 from variables import *
 
+from Example4_Qt import *
+
 
 class Client:
     def __init__(self, host, port):
@@ -11,6 +13,11 @@ class Client:
         self.sock.connect((host, port))
         self.sock.send(b'1')
         self.nickname = None
+
+        app = QApplication(sys.argv)
+        MainWindow = Main()
+        MainWindow.show()
+        sys.exit(app.exec_())
 
     def sendThreadFunc(self):
         while True:
