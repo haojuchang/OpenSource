@@ -8,6 +8,7 @@ class Main(QMainWindow, chatroomUI.Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.pushButton.setText("Send")
+		
 
 
 if __name__ == "__main__":
