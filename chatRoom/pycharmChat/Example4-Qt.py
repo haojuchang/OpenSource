@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
-import chatroomUI
+import example_ui
 import sys
 
-class Main(QMainWindow, chatroomUI.Ui_MainWindow):
+class Main(QMainWindow, example_ui.Ui_MainWindow):
 
     def __init__(self):
         super(self.__class__, self).__init__()
