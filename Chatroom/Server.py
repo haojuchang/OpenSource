@@ -18,6 +18,7 @@ class Server:
         self.MDB = DataBaseChatRoom()
         self.GUI = Main()
         self.GUI.show()
+        self.showUsers()
         self.mylist = list()
         self.nicknames = dict()
 
@@ -26,23 +27,24 @@ class Server:
         print('Server', socket.gethostbyname(host), 'listening ...')
 
     def checkConnection(self):
-        connection, addr = self.sock.accept()
-        print('Accept a new connection', connection.getsockname(), connection.fileno())
+        while True:
+            connection, addr = self.sock.accept()
+            print('Accept a new connection', connection.getsockname(), connection.fileno())
 
-        try:
-            buf = connection.recv(1024).decode()
-            if buf == '1':
-                # start a thread for new connection
-                connection.send(b'Welcome to chat room!')
-                mythread = threading.Thread(target=self.subThreadIn, args=(connection, connection.fileno()))
-                mythread.setDaemon(True)
-                mythread.start()
+            try:
+                buf = connection.recv(1024).decode()
+                if buf == '1':
+                    # start a thread for new connection
+                    connection.send(b'Welcome to chat room!')
+                    mythread = threading.Thread(target=self.subThreadIn, args=(connection, connection.fileno()))
+                    mythread.setDaemon(True)
+                    mythread.start()
 
-            else:
-                connection.send(b'please go out!')
-                connection.close()
-        except:
-            pass
+                else:
+                    connection.send(b'please go out!')
+                    connection.close()
+            except:
+                pass
 
     def subThreadIn(self, myconnection, connNumber):
         self.mylist.append(myconnection)
@@ -105,13 +107,18 @@ class Server:
         i = 1
         for u in users:
             self.GUI.showbox(u["uname"], i)
+            print(u["uname"])
             i += 1
 
 def main():
     app = QApplication(sys.argv)
     s = Server(HOST, 5555)
-    while True:
-        s.checkConnection()
+
+    th1 = threading.Thread(target=s.checkConnection)
+    th1.setDaemon(True)
+    th1.start()
+    th1.join
+
     sys.exit(app.exec_())
 
 if __name__ == "__main__":

@@ -9,9 +9,7 @@ class Main(QMainWindow, layout.Ui_MainWindow):
         self.setupUi(self)
         self.add.setText("Add")
         self.below_btn.setText("Del")
-        self.showbox("a", 1)
-        self.showbox("b", 2)
-        self.showbox("c", 3)
+
 
 
 if __name__ == "__main__":

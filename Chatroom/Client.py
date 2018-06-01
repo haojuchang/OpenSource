@@ -5,7 +5,6 @@ from variables import *
 from Example4_Qt import *
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from InitDB import DataBaseChatRoom
 
 class FQThread(QThread):
     message = pyqtSignal(str)
