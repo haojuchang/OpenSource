@@ -7,6 +7,8 @@ from variables import *
 from layout_Qt import *
 from InitDB import *
 
+from InitDB import DataBaseChatRoom
+
 class Server:
     def __init__(self, host, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,6 +20,8 @@ class Server:
         self.GUI.show()
         self.mylist = list()
         self.nicknames = dict()
+
+        self.data_base_char_room = DataBaseChatRoom()
 
         print('Server', socket.gethostbyname(host), 'listening ...')
 
@@ -47,10 +51,24 @@ class Server:
                 recvedMsg = myconnection.recv(1024).decode()
 
                 if '#NAME#' in recvedMsg:
+                    print(recvedMsg)
                     nickname = recvedMsg.split(',')[1]
-                    announcement = "SYSTEM: {nickname} in the chat room".format(nickname=nickname)
-                    self.tellOthers(myconnection.fileno(), announcement)
-                    self.nicknames[myconnection] = nickname
+                    password = recvedMsg.split(',')[3]
+                    print(nickname)
+                    print(password)
+
+                    print(self.data_base_char_room.queryByuname(nickname, password).count())
+
+                    if bool(self.data_base_char_room.queryByuname(nickname, password).count()):
+                        announcement = "SYSTEM: {nickname} in the chat room".format(nickname=nickname)
+                        self.tellOthers(myconnection.fileno(), announcement)
+
+                        self.nicknames[myconnection] = nickname
+
+                        myconnection.send(b'#SUCCESS#')
+                    else:
+                        self.mylist.remove(myconnection)
+                        myconnection.close()
                 elif '#updatePWD#' in recvedMsg:
                     user = recvedMsg.split(',')
                     self.MDB.updataUser(user[1], user[2])
@@ -90,10 +108,11 @@ class Server:
             i += 1
 
 def main():
+    app = QApplication(sys.argv)
     s = Server(HOST, 5555)
     while True:
         s.checkConnection()
-
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()

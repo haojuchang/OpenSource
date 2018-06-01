@@ -5,6 +5,8 @@ from variables import *
 from Example4_Qt import *
 from PyQt5.QtCore import QThread, pyqtSignal
 
+from InitDB import DataBaseChatRoom
+
 class FQThread(QThread):
     message = pyqtSignal(str)
 
@@ -25,11 +27,13 @@ class Client:
         self.FQ.message.connect(self.appendMessage)
         self.GUI = Main()
         self.GUI.pushButton.clicked.connect(self.sendMessage)
-        self.GUI.pushButton_2.clicked.connect(self.setNickname)
+        self.GUI.pushButton_2.clicked.connect(self.login)
         self.GUI.up_pass.clicked.connect(self.updatePWD)
         self.GUI.show()
         self.GUI.lineEdit.setDisabled(True)
         self.GUI.pushButton.setDisabled(True)
+
+        self.data_base_char_room = DataBaseChatRoom()
 
     def sendMessage(self):
         try:
@@ -47,25 +51,29 @@ class Client:
         while True:
             try:
                 received_messages = self.sock.recv(1024)
-
                 if self.nickname is not None or received_messages == b'Welcome to chat room!':
-                    received_messages = received_messages.decode()
-                    self.FQ.message.emit(received_messages)
+                    if received_messages == b'#SUCCESS#':
+                        self.GUI.lineEdit.setDisabled(False)
+                        self.GUI.pushButton.setDisabled(False)
+                    else:
+                        received_messages = received_messages.decode()
+                        self.FQ.message.emit(received_messages)
             except ConnectionAbortedError:
                 print('Server closed this connection!')
 
             except ConnectionResetError:
                 print('Server is closed!')
 
-    def setNickname(self):
+    def login(self):
         self.nickname = self.GUI.lineEdit_2.text()
-        message = '#NAME#,{nickname}'.format(nickname=self.nickname)
+        self.password = self.GUI.password.text()
+        message = '#NAME#,{nickname},#PASSWORD#,{password}'.format(nickname=self.nickname, password=self.password)
         self.GUI.textBrowser.append("Now Lets Chats, {nickname}".format(nickname=self.nickname))
         self.sock.send(message.encode())
+
+        self.GUI.password.setDisabled(True)
         self.GUI.pushButton_2.setDisabled(True)
         self.GUI.lineEdit_2.setDisabled(True)
-        self.GUI.lineEdit.setDisabled(False)
-        self.GUI.pushButton.setDisabled(False)
 
     def appendMessage(self, data):
         self.GUI.textBrowser.append(data)
