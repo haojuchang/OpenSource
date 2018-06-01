@@ -50,9 +50,10 @@ class Server:
                     nickname = recvedMsg.split(',')[1]
                     announcement = "SYSTEM: {nickname} in the chat room".format(nickname=nickname)
                     self.tellOthers(myconnection.fileno(), announcement)
-
                     self.nicknames[myconnection] = nickname
-
+                elif '#updatePWD#' in recvedMsg:
+                    user = recvedMsg.split(',')
+                    self.MDB.updataUser(user[1], user[2])
                 elif recvedMsg:
                     now = datetime.now()
                     my_time = "[{hour}:{minute}:{second}]".format(hour=now.hour, minute=now.minute, second=now.second)
@@ -89,7 +90,7 @@ class Server:
             i += 1
 
 def main():
-    s = Server(HOST, 5550)
+    s = Server(HOST, 5555)
     while True:
         s.checkConnection()
 

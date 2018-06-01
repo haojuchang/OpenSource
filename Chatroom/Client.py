@@ -3,7 +3,16 @@ import threading
 
 from variables import *
 from Example4_Qt import *
+from PyQt5.QtCore import QThread, pyqtSignal
 
+class FQThread(QThread):
+    message = pyqtSignal(str)
+
+    def __init__(self):
+        QThread.__init__(self)
+
+    def __del__(self):
+        self.wait()
 
 class Client:
     def __init__(self, host, port):
@@ -12,14 +21,17 @@ class Client:
         self.sock.connect((host, port))
         self.sock.send(b'1')
         self.nickname = None
+        self.FQ = FQThread()
+        self.FQ.message.connect(self.appendMessage)
         self.GUI = Main()
-        self.GUI.pushButton.clicked.connect(self.sendThreadFunc)
+        self.GUI.pushButton.clicked.connect(self.sendMessage)
         self.GUI.pushButton_2.clicked.connect(self.setNickname)
+        self.GUI.up_pass.clicked.connect(self.updatePWD)
         self.GUI.show()
         self.GUI.lineEdit.setDisabled(True)
         self.GUI.pushButton.setDisabled(True)
 
-    def sendThreadFunc(self):
+    def sendMessage(self):
         try:
             if self.nickname is not None:
                 myword = self.GUI.lineEdit.text()
@@ -31,14 +43,14 @@ class Client:
         except ConnectionResetError:
             print('Server is closed!')
 
-    def recvThreadFunc(self):
+    def recvMessage(self):
         while True:
             try:
                 received_messages = self.sock.recv(1024)
 
                 if self.nickname is not None or received_messages == b'Welcome to chat room!':
                     received_messages = received_messages.decode()
-                    self.GUI.textBrowser.append(received_messages)
+                    self.FQ.message.emit(received_messages)
             except ConnectionAbortedError:
                 print('Server closed this connection!')
 
@@ -55,14 +67,23 @@ class Client:
         self.GUI.lineEdit.setDisabled(False)
         self.GUI.pushButton.setDisabled(False)
 
+    def appendMessage(self, data):
+        self.GUI.textBrowser.append(data)
+
+    def updatePWD(self):
+        udPWD = self.GUI.ch_pass.text()
+        message = '#updatePWD#,%s,%s' % (self.nickname, udPWD)
+        self.sock.send(message.encode())
+
 def main():
     app = QApplication(sys.argv)
 	
-    c = Client(HOST, 5550)
-    th1 = threading.Thread(target=c.recvThreadFunc)
+    c = Client(HOST, 5555)
+    th1 = threading.Thread(target=c.recvMessage)
     th1.setDaemon(True)
     th1.start()
     th1.join
+
     sys.exit(app.exec_())
 
 

@@ -28,8 +28,9 @@ class DataBaseChatRoom:
         self.collection = self.database["user"]  # SQL: Table Name
 
     def loadData(self):
-        
-        return None
+        cursor = self.collection.find({})
+        data = [d for d in cursor]
+        return data
 
     # delete user by uname
     # dbChatRoom.deleteUser(['A'])
@@ -45,19 +46,19 @@ class DataBaseChatRoom:
         return 'successful'
 
     def updataUser(self, uname=None, upwd=None):
-        user = collection.find_one({'uname': uname})
+        user = self.collection.find_one({'uname': uname})
         user['upwd'] = upwd
-        collection.save(user)
+        self.collection.save(user)
         return 'successful'
 
     # check checkUserExist
     def checkUserExist(self, uname='A'):
-        return bool(collection.find({'uname': uname}).count())
+        return bool(self.collection.find({'uname': uname}).count())
 
     # query user bu uname
     # dbChatRoom.queryByuname(uname='A', upwd='A')
     def queryByuname(self, uname='A', upwd='A'):
-        return collection.find({'uname': uname, 'upwd': upwd}).sort('uname')
+        return self.collection.find({'uname': uname, 'upwd': upwd}).sort('uname')
 
     # Init database
     # dbChatRoom.Initdatabase()
