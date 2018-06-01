@@ -45,20 +45,19 @@ class DataBaseChatRoom:
         return 'successful'
 
     def updataUser(self, uname=None, upwd=None):
-        temp = self.collection.find_one({ "uname":uname })
-        temp["upwd"] = upwd
+        user = collection.find_one({'uname': uname})
+        user['upwd'] = upwd
+        collection.save(user)
         return 'successful'
 
     # check checkUserExist
     def checkUserExist(self, uname='A'):
-        pass
-        return False
+        return bool(collection.find({'uname': uname}).count())
 
     # query user bu uname
     # dbChatRoom.queryByuname(uname='A', upwd='A')
     def queryByuname(self, uname='A', upwd='A'):
-        pass
-        return False
+        return collection.find({'uname': uname, 'upwd': upwd}).sort('uname')
 
     # Init database
     # dbChatRoom.Initdatabase()
