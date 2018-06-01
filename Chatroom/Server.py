@@ -4,7 +4,8 @@ import threading
 from datetime import datetime
 
 from variables import *
-
+from layout_Qt import *
+from InitDB import *
 
 class Server:
     def __init__(self, host, port):
@@ -12,7 +13,9 @@ class Server:
         self.sock = sock
         self.sock.bind((host, port))
         self.sock.listen(5)
-
+        self.MDB = DataBaseChatRoom()
+        self.GUI = Main()
+        self.GUI.show()
         self.mylist = list()
         self.nicknames = dict()
 
@@ -78,6 +81,12 @@ class Server:
                 except:
                     pass
 
+    def showUsers(self):
+        users = self.MDB.loadData()
+        i = 1
+        for u in users:
+            self.GUI.showbox(u["uname"], i)
+            i += 1
 
 def main():
     s = Server(HOST, 5550)
